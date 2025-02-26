@@ -185,7 +185,12 @@ if ( function_exists( 'mb_strtolower' ) ) {
  */
 function jr_mt_current_theme( $option ) {
 	global $jr_mt_options_cache;
-	return $jr_mt_options_cache[$option];
+	/**
+	 * 26.2.2025.
+	 * @author Lovro
+	 * supress error when index is not in array or variable is null
+	 */
+	return @$jr_mt_options_cache[$option];
 }
 
 /**
