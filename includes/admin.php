@@ -14,7 +14,7 @@ $jr_mt_kwvalsep = 'A';
 
 	But don't display on Settings page itself.
 */
-if ( ( !isset( $_GET['page'] ) || ( 'jr_mt_settings' !== $_GET['page'] ) ) 
+if ( ( !isset( $_GET['page'] ) || ( 'jr_mt_settings' !== $_GET['page'] ) )
 	&& ( ( FALSE === ( $internal_settings = get_option( 'jr_mt_internal_settings' ) ) )
 		|| ( !isset( $internal_settings['v7init'] ) ) )
 	&& ( FALSE !== get_option( 'jr_mt_settings' ) ) ) {
@@ -26,7 +26,7 @@ if ( ( !isset( $_GET['page'] ) || ( 'jr_mt_settings' !== $_GET['page'] ) )
 	add_action( 'all_admin_notices', 'jr_mt_v7init_required' );
 	/**
 	* Warn that Private Site is turned OFF by default
-	* 
+	*
 	* Put Warning on top of every Admin page (visible to Admins only)
 	* until Admin visits plugin's Settings page.
 	*
@@ -49,7 +49,7 @@ function jr_mt_admin_enqueue_scripts() {
 
 /**
  * Settings page for plugin
- * 
+ *
  * Display and Process Settings page for this plugin.
  *
  */
@@ -59,13 +59,13 @@ function jr_mt_settings_page() {
 	add_thickbox();
 	echo '<div class="wrap">';
 	echo '<h2>' . $jr_mt_plugin_data['Name'] . '</h2>';
-	
+
 	/*	Required because it is only called automatically for Admin Pages in the Settings section
 	*/
 	settings_errors( 'jr_mt_settings' );
-	
+
 	/*	Return to Same Tab where button was pushed.
-	
+
 		TODO:  This should be converted to use wp_localize_script()
 		as described on page 356 of "Professional WordPress Plugin Development" 2011.
 	*/
@@ -77,18 +77,18 @@ function jr_mt_settings_page() {
 	}
 	echo '<script type="text/javascript">window.onload = function() { jrMtTabs('
 		. $tab . ', 6 ); }</script>';
-	
+
 	$theme_obj = wp_get_theme();
 	$theme = $theme_obj->Name;
 	$theme_version = $theme_obj->Version;
 	global $jr_mt_options_cache;
 
 	$current_wp_version = get_bloginfo( 'version' );
-	
+
 	global $jr_mt_plugins_cache;
-	
+
 	$compatible = TRUE;
-	
+
 	//	Check for incompatible plugins that have been activated:  BuddyPress and Theme Test Drive
 	global $jr_mt_incompat_plugins;
 	foreach ( $jr_mt_plugins_cache as $rel_path => $plugin_data ) {
@@ -97,14 +97,14 @@ function jr_mt_settings_page() {
 				echo '<h3>Plugin Conflict Error Detected</h3>';
 				$compatible = FALSE;
 			}
-			echo '<p>This Plugin (' . $jr_mt_plugin_data['Name'] . ') cannot be used when the <b>' . $plugin_data['Name'] 
-				. '</b> plugin is Activated.  If you wish to use the ' . $jr_mt_plugin_data['Name'] 
-				. ' plugin, please deactivate the '  . $plugin_data['Name'] 
-				. ' plugin (not just when viewing this Settings page, but whenever the ' 
+			echo '<p>This Plugin (' . $jr_mt_plugin_data['Name'] . ') cannot be used when the <b>' . $plugin_data['Name']
+				. '</b> plugin is Activated.  If you wish to use the ' . $jr_mt_plugin_data['Name']
+				. ' plugin, please deactivate the '  . $plugin_data['Name']
+				. ' plugin (not just when viewing this Settings page, but whenever the '
 				. $jr_mt_plugin_data['Name'] . ' plugin is activated).</p>';
 		}
 	}
-	
+
 	if ( $compatible ) {
 		?>
 		<style type="text/css">
@@ -135,7 +135,7 @@ function jr_mt_settings_page() {
 		</li>
 		<li>
 		when upgrading from Version 5 (or earlier) of this plugin,
-		and 
+		and
 		</li>
 		<li>
 		whenever you change the
@@ -160,15 +160,20 @@ function jr_mt_settings_page() {
 		</p>
 		<ul class="jrmtpoints">
 		<?php
-		
-		unregister_setting( 'jr_mt_settings', 'jr_mt_settings', 'jr_mt_validate_settings' );
-		
+
+		/**
+		 * 20.6.2025.
+		 * third parameter is deprecated since 4.7.0
+		 * @author Lovro Hrust
+		 */
+		unregister_setting( 'jr_mt_settings', 'jr_mt_settings' );
+
 		global $wp;
 		$default_internal_settings = array(
 			'version'    => $jr_mt_plugin_data['Version'],
 			'permalink'  => get_option( 'permalink_structure' ),
 			/*	Store $wp->public_query_vars for when they are needed before 'setup_theme' Action
-			
+
 				Note:  $wp is not valid until 'setup_theme' Action.
 			*/
 			'query_vars' => $wp->public_query_vars
@@ -180,9 +185,9 @@ function jr_mt_settings_page() {
 				because no Version Conversion is required.
 			*/
 			if ( ( !isset( $internal_settings['version'] ) ) || ( !is_string( $internal_settings['version'] ) ) ) {
-				$internal_settings['version'] = $default_internal_settings['version'];				
+				$internal_settings['version'] = $default_internal_settings['version'];
 			}
-			$internal_settings['query_vars'] = $default_internal_settings['query_vars'];	
+			$internal_settings['query_vars'] = $default_internal_settings['query_vars'];
 		} else {
 			$internal_settings = $default_internal_settings;
 			jr_mt_messages( 'First use (or after plugin deleted): initialize Internal ("invisible") Settings' );
@@ -191,7 +196,7 @@ function jr_mt_settings_page() {
 		/*	Update to Current Version (which may be the same as Previous Version)
 		*/
 		$internal_settings['version'] = $default_internal_settings['version'];
-		
+
 		$internal_settings['v7init'] = TRUE;
 
 		if ( $internal_settings !== $internal_settings_original ) {
@@ -200,7 +205,7 @@ function jr_mt_settings_page() {
 			} else {
 				jr_mt_messages( 'Internal ("invisible") Settings have changed but could not be updated' );
 			}
-		}		
+		}
 
 		/*	Check if any Settings were not properly converted from prior versions,
 			the Site URL has changed, or the settings are otherwise corrupted.
@@ -231,7 +236,7 @@ function jr_mt_settings_page() {
 			$default_settings = jr_mt_default_settings();
 			/*	Check for unconverted Version 4 Settings
 			*/
-			if ( ( !isset( $settings['url'] ) ) 
+			if ( ( !isset( $settings['url'] ) )
 				|| version_compare( $previous_version, '5', '<' ) ) {
 				require_once( jr_mt_path() . 'includes/upgradev5.php' );
 				$settings = jr_mt_convert_ids( $settings );
@@ -239,7 +244,7 @@ function jr_mt_settings_page() {
 			}
 			/*	Check for unconverted Version 5 Settings
 			*/
-			if ( ( !isset( $settings['aliases'] ) ) 
+			if ( ( !isset( $settings['aliases'] ) )
 				|| version_compare( $previous_version, '6', '<' ) ) {
 				$settings['aliases'] = $default_settings['aliases'];
 				require_once( jr_mt_path() . 'includes/upgradev6.php' );
@@ -279,8 +284,8 @@ function jr_mt_settings_page() {
 				$rebuild_prep = TRUE;
 			} else {
 				foreach ( $settings['aliases'] as $alias ) {
-					if ( ( !is_string( $alias['url'] ) ) 
-						|| ( !is_array( $alias['prep'] ) ) 
+					if ( ( !is_string( $alias['url'] ) )
+						|| ( !is_array( $alias['prep'] ) )
 						|| !is_bool( $alias['home'] ) ) {
 						$settings['aliases'] = $default_settings['aliases'];
 						jr_mt_messages( 'Site Aliases settings are corrupt; reset to Default Aliases, if any' );
@@ -301,10 +306,10 @@ function jr_mt_settings_page() {
 						jr_mt_messages( 'URL setting(s) deleted because they are corrupt' );
 					} else {
 						foreach ( $settings[ $url_type ] as $index => $url_array ) {
-							if ( ( !isset( $url_array['url'] ) ) 
-								|| ( !isset( $url_array['prep'] ) ) 
+							if ( ( !isset( $url_array['url'] ) )
+								|| ( !isset( $url_array['prep'] ) )
 								|| ( !isset( $url_array['theme'] ) )
-								|| ( !is_string( $url_array['url'] ) ) 
+								|| ( !is_string( $url_array['url'] ) )
 								|| ( !is_string( $url_array['theme'] ) )
 								|| ( !isset( $jr_mt_all_themes[ $url_array['theme'] ] ) ) ) {
 								unset( $settings[ $url_type ][ $index ] );
@@ -314,7 +319,7 @@ function jr_mt_settings_page() {
 									If any are not, rebuild all ['prep'] entries.
 								*/
 								if ( is_array( $url_array['prep'] ) ) {
-									/*	Be sure that all ['prep'] entries have a ['query'] entry when the 
+									/*	Be sure that all ['prep'] entries have a ['query'] entry when the
 										URL has a Query in it, denoted by a "?".
 										If any not found, Rebuild all the ['prep'] entries.
 									*/
@@ -322,10 +327,10 @@ function jr_mt_settings_page() {
 										foreach ( $url_array['prep'] as $prep_entry ) {
 											if ( isset( $prep_entry['query'] ) && is_array( $prep_entry['query'] ) ) {
 												/*	Check for unconverted and corrupt Queries in ['prep']['query'] Settings
-							
+
 													A Keyword ending in "=" or a Value beginning with "=" gets converted.
 													A "=" anywhere else means Corruption.
-												*/											
+												*/
 												foreach ( $prep_entry['query'] as $keyword => $value_array ) {
 													if ( is_array( $value_array ) ) {
 														foreach ( $value_array as $value => $equalsign ) {
@@ -360,7 +365,7 @@ function jr_mt_settings_page() {
 								} else {
 									$rebuild_prep = TRUE;
 								}
-								
+
 								/*	Convert any integer Page/Post/Attachment ID to a string
 									so it will match the type of a Query value in PHP/HTTP
 								*/
@@ -368,12 +373,12 @@ function jr_mt_settings_page() {
 									$settings[ $url_type ][ $index ]['id'] = ( string ) $url_array['id'];
 									jr_mt_messages( 'Integer type Page/Post/Attachment ID found: converted to String type' );
 								}
-								if ( isset( $url_array['id_kw'] ) 
-									&& ( ( !is_string( $url_array['id_kw'] ) ) 
+								if ( isset( $url_array['id_kw'] )
+									&& ( ( !is_string( $url_array['id_kw'] ) )
 										|| ( !in_array( $url_array['id_kw'], array( 'page_id', 'p', 'attachment_id' ), TRUE ) ) ) ) {
 									unset( $settings[ $url_type ][ $index ]['id_kw'] );
 								}
-								if ( isset( $url_array['rel_url'] ) 
+								if ( isset( $url_array['rel_url'] )
 									&& ( !is_string( $url_array['rel_url'] ) ) ) {
 									unset( $settings[ $url_type ][ $index ]['rel_url'] );
 								}
@@ -402,7 +407,7 @@ function jr_mt_settings_page() {
 						}
 						if ( empty( $settings['query'][ $keyword ] ) ) {
 							unset( $settings['query'][ $keyword ] );
-						}								
+						}
 					} else {
 						unset( $settings['query'][ $keyword ] );
 						jr_mt_messages( 'Query setting deleted because it is corrupt' );
@@ -411,8 +416,8 @@ function jr_mt_settings_page() {
 				/*	Check: 'remember', 'override'
 				*/
 				foreach ( array( 'remember', 'override' ) as $key ) {
-					if ( is_array( $settings[ $key ] ) 
-						&& isset( $settings[ $key ]['query'] ) 
+					if ( is_array( $settings[ $key ] )
+						&& isset( $settings[ $key ]['query'] )
 						&& is_array( $settings[ $key ]['query'] ) ) {
 						foreach ( $settings[ $key ] as $query_constant => $query_array ) {
 							if ( 'query' !== $query_constant ) {
@@ -423,7 +428,7 @@ function jr_mt_settings_page() {
 						foreach ( $settings[ $key ]['query'] as $keyword => $value_array ) {
 							if ( is_array( $value_array ) ) {
 								foreach ( $value_array as $value => $bool ) {
-									if ( ( !is_bool( $bool ) ) 
+									if ( ( !is_bool( $bool ) )
 										|| ( !isset( $settings['query'][ $keyword ][ $value ] ) ) ) {
 										unset( $settings[ $key ]['query'][ $keyword ][ $value ] );
 										jr_mt_messages( 'Sticky/Override setting(s) deleted because they are corrupt' );
@@ -443,11 +448,11 @@ function jr_mt_settings_page() {
 					}
 				}
 			}
-			
+
 			/*	Check for missing ['rel_url'] and build it
 			*/
 			$settings = jr_mt_missing_rel_url( $settings, JR_MT_HOME_URL );
-			
+
 			/*	Check if Site URL has changed by comparing corresponding ['url'] of ['home']
 				setting in Aliases array with current Site URL.
 			*/
@@ -466,14 +471,14 @@ function jr_mt_settings_page() {
 				}
 				if ( $site_url_changed ) {
 					$settings = jr_mt_rebuild_display_url( $settings, $old_site_url );
-					
+
 					/*	See if there is an Alias entry for the new Site URL.
 						If not, add one, and perhaps another with/without www.
 					*/
 					$settings = jr_mt_rebuild_alias_home( $settings );
-					
+
 					jr_mt_messages( 'Site Address (URL) has changed:  any URLs and Aliases in settings have been updated' );
-					
+
 					/*	Rebuild ['prep']
 					*/
 					$rebuild_prep = TRUE;
@@ -488,7 +493,7 @@ function jr_mt_settings_page() {
 			if ( isset( $rebuild_prep ) ) {
 				$settings = jr_mt_rebuild_prep( $settings );
 				jr_mt_messages( 'URL settings, if any, have had their URL matching structures rebuilt' );
-			}				
+			}
 		} else {
 			$settings = jr_mt_default_settings();
 			jr_mt_messages( 'First use (or after plugin deleted): initialize Plugin Settings', 'immediate' );
@@ -518,7 +523,7 @@ function jr_mt_settings_page() {
 		</p>
 		<?php
 		jr_mt_admin_init();
-		
+
 		echo '<form action="options.php" method="POST">';
 		$permalink = get_option( 'permalink_structure' );
 		if ( isset( $internal_settings['permalink'] ) ) {
@@ -619,11 +624,11 @@ function jr_mt_settings_page() {
 		}
 		?>
 		<p>
-		If a newly-added Theme Selection does not seem to be working, 
-		especially if the associated web page does not display properly, 
-		try deactivating any plugins that provide Caching. 
-		You may find that you have to flush the plugin's Cache whenever you add or change a Theme Selection setting. 
-		Also note that some Caching plugins only cache for visitors who are not logged in, 
+		If a newly-added Theme Selection does not seem to be working,
+		especially if the associated web page does not display properly,
+		try deactivating any plugins that provide Caching.
+		You may find that you have to flush the plugin's Cache whenever you add or change a Theme Selection setting.
+		Also note that some Caching plugins only cache for visitors who are not logged in,
 		so be sure to check your site after logging out.
 		</p>
 		<p>
@@ -635,7 +640,7 @@ function jr_mt_settings_page() {
 		</p>
 		<hr />
 		<?php
-		
+
 		//	Plugin Settings are displayed and entered here:
 		settings_fields( 'jr_mt_settings' );
 		do_settings_sections( 'jr_mt_settings_page' );
@@ -661,10 +666,10 @@ function jr_mt_settings_page() {
 	</h3>
 	<p>
 	This tab provides information on changing Theme Options
-	(Widgets, Sidebars, Menus, Background, Header, etc.) 
+	(Widgets, Sidebars, Menus, Background, Header, etc.)
 	for all the different Themes used on a WordPress site.
 	</p>
-	<p>	
+	<p>
 	Information on changing the Template for each Page or Post
 	is found near the bottom of this tab.
 	</p>
@@ -673,20 +678,20 @@ function jr_mt_settings_page() {
 	</h3>
 	<p>
 	For the Active Theme, nothing changes when using the jonradio Multiple Themes plugin.
-	Options for the Active Theme, 
-	including Widgets, Sidebars, Menus, Background, Header and other Customizations supported by the Theme, 
+	Options for the Active Theme,
+	including Widgets, Sidebars, Menus, Background, Header and other Customizations supported by the Theme,
 	can be modified in the Admin panel using the Appearance menu items on the left sidebar.
 	Some Themes also provide their own menu items in the left sidebar of the Admin panel,
 	and these will still appear for the Active Theme when using this plugin.
 	</p>
-	<p>	
+	<p>
 	It is more difficult to modify Options for installed Themes that are not the WordPress Active Theme.
-	Building this functionality into this plugin is in the plans for a future Version, 
+	Building this functionality into this plugin is in the plans for a future Version,
 	but it is not clear just how practical that is, so the best that can be said is:
 	<i>
 	Maybe</i>.
 	</p>
-	<p>	
+	<p>
 	For now, there are four approaches that can be used to change Options for an installed Theme that is not the Active Theme.
 	The first works best if only one Theme has a lot of Options that need to be changed frequently:
 	</p>
@@ -705,7 +710,7 @@ function jr_mt_settings_page() {
 	<b>
 	Select Theme for Everything
 	</b>
-	field 
+	field
 	and it will be used everywhere except where you have specified
 	another Theme in the Theme Selection entries for this plugin.
 	</li>
@@ -719,7 +724,7 @@ function jr_mt_settings_page() {
 	</p>
 	<ol>
 	<li>
-	Menus really work well with Method #1, 
+	Menus really work well with Method #1,
 	but are severely restricted with Method #2;
 	</li>
 	<li>
@@ -758,12 +763,12 @@ function jr_mt_settings_page() {
 	and click the Live Preview button that appears.
 	</li>
 	<li>
-    Use the left sidebar to modify the Theme Options. 
+    Use the left sidebar to modify the Theme Options.
 	Note that
 	<b>
 	Navigation
 	</b>
-	will not appear in the Live Preview sidebar until a Menu has been defined in Appearance-Menus. 
+	will not appear in the Live Preview sidebar until a Menu has been defined in Appearance-Menus.
 	Navigation is where you would set the custom menu(s) to be used for the Theme you are currently previewing.
 	</li>
 	<li>
@@ -787,10 +792,10 @@ function jr_mt_settings_page() {
 	Note: this approach only allows Menus to be set for one Theme. Using this method to assign one or more menus to a Theme will unassign menus for all other Themes.
 	</p>
 	<p>
-	The jonradio Multiple Themes plugin (i.e. - this plugin) must be Deactivated, 
+	The jonradio Multiple Themes plugin (i.e. - this plugin) must be Deactivated,
 	and the Theme Test Drive plugin installed and activated.
-	This enables each Theme to be selected with the Theme Test Drive plugin, 
-	allowing the Theme's Options to be set 
+	This enables each Theme to be selected with the Theme Test Drive plugin,
+	allowing the Theme's Options to be set
 	<i>
 	as if
 	</i>
@@ -808,7 +813,7 @@ function jr_mt_settings_page() {
     Activate the Theme Test Drive plugin.
 	</li>
 	<li>
-    Go to 
+    Go to
 	<b>
 	Appearance-Theme Test Drive
 	</b>
@@ -833,7 +838,7 @@ function jr_mt_settings_page() {
 	<i>
 	without
 	</i>
-	the Theme Test Drive plugin activated). 
+	the Theme Test Drive plugin activated).
 	</li>
 	<li>
     Deactivate the Theme Test Drive plugin.
@@ -857,7 +862,7 @@ function jr_mt_settings_page() {
 	Note:
 	this approach is the most likely to cause the loss of Theme Options set in other Themes,
 	though the risk does depend on the Theme and the Options that are set.
-	</p>	
+	</p>
 	<ol>
 	<li>
     Go to Appearance-Themes in the WordPress Admin panels.
@@ -882,12 +887,12 @@ function jr_mt_settings_page() {
 	</ol>
 	<h3>
 	Changing Templates
-	</h3>	
+	</h3>
 	<p>
 	Many Themes provide more than one Template.
 	For each Page or Post, you can select the Template you want to use for that Page or Post.
 	</p>
-	<p>	
+	<p>
 	For the Active Theme, nothing changes when using the jonradio Multiple Themes plugin.
 	Select an alternate Template from the drop-down list in the Template field of the Page Attributes section of the Add New Page, Edit Page, Add New Post or Edit Post page of the Admin panels.
 	Or the Template field in Quick Edit.
@@ -897,10 +902,10 @@ function jr_mt_settings_page() {
 	Building this functionality into this plugin is in the plans for a future Version.
 	</p>
 	<p>
-	Use the Theme Test Drive plugin. 
-	The jonradio Multiple Themes plugin (i.e. - this plugin) must be Deactivated, and the Theme Test Drive plugin installed and activated, 
-	so that each Theme can be selected with the Theme Test Drive plugin, 
-	allowing the Theme's Template to be set for each Page or Post using that Theme 
+	Use the Theme Test Drive plugin.
+	The jonradio Multiple Themes plugin (i.e. - this plugin) must be Deactivated, and the Theme Test Drive plugin installed and activated,
+	so that each Theme can be selected with the Theme Test Drive plugin,
+	allowing the Theme's Template to be set for each Page or Post using that Theme
 	<i>
 	as if
 	</i>
@@ -918,7 +923,7 @@ function jr_mt_settings_page() {
     Activate the Theme Test Drive plugin.
 	</li>
 	<li>
-    Go to 
+    Go to
 	<b>
 	Appearance-Theme Test Drive
 	</b>
@@ -954,7 +959,7 @@ function jr_mt_settings_page() {
 	<i>
 	without
 	</i>
-	the Theme Test Drive plugin activated). 
+	the Theme Test Drive plugin activated).
 	</li>
 	<li>
     Deactivate the Theme Test Drive plugin.
@@ -1030,7 +1035,7 @@ function jr_mt_settings_page() {
 	echo '<li>MySQL Version ' . $wpdb->get_var( 'SELECT VERSION();', 0, 0 ) . '</li>';
 
 	echo '</ul></p>';
-	
+
 	$paths = array(
 		'/..',
 		'/',
@@ -1145,7 +1150,7 @@ function jr_mt_settings_page() {
 	<li>
 	Site 1 could be
 	<code>example.com</code>,
-	the web site's home page, 
+	the web site's home page,
 	and any other web pages with the same Theme;
 	</li>
 	<li>
@@ -1155,7 +1160,7 @@ function jr_mt_settings_page() {
 	with a different Theme;
 	</li>
 	<li>
-	Site 3 could be 
+	Site 3 could be
 	<code>example.com/news</code>
 	for a News section with its own Theme;
 	and
@@ -1187,15 +1192,15 @@ function jr_mt_settings_page() {
 	Want to Help?
 	</h3>
 	<p>
-	You can help by 
-	<a target="_blank" href="http://wordpress.org/support/view/plugin-reviews/jonradio-multiple-themes">reviewing this plugin</a> 
+	You can help by
+	<a target="_blank" href="http://wordpress.org/support/view/plugin-reviews/jonradio-multiple-themes">reviewing this plugin</a>
 	for the WordPress Plugin Directory,
 	and telling other people that it works for your particular combination of Plugin version and WordPress version
 	in the Compability section of the
 	<a target="_blank" href="http://wordpress.org/plugins/jonradio-multiple-themes/">WordPress Directory entry for this plugin</a>.
 	</p>
 	</div>
-	
+
 	</div>
 	<?php
 	/*	</div> ends the <div class="wrap"> at the beginning
